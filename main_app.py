@@ -1,12 +1,24 @@
 import hashlib
 import queue
+import random
 import re
 import time
 
 import pymongo
+import redis
 import requests
 from lxml import etree
 from concurrent.futures.thread import ThreadPoolExecutor
+
+def get_ret_proxies():
+    db = redis.StrictRedis(host='127.0.0.1', port=6379, db=0)
+    proxies = db.smembers('proxies')
+    p_l = [i for i in db.smembers('proxies')]
+    ret = []
+    for p in p_l:
+        item = {'http': p.decode(), 'https': p.decode()}
+        ret.append(item)
+    return ret
 
 
 class Main:
@@ -75,11 +87,14 @@ class Main:
                 item['url'] = li.xpath('.//a[@class="CLICKDATA maidian-detail"]/@href')[0]
                 item['_id'] = hashlib.md5(project_data + item['dealDate'] + item['dealPrice']).hexdigest()
                 item['crawl_time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-                item['caoxiang'] = li.xpath('.//div[@class="houseInfo"]/span/text()').strip('|')[0]
-                item['zhuangxiu'] = li.xpath('.//div[@class="houseInfo"]/span/text()').strip('|')[1]
+                item['caoxiang'] = li.xpath('.//div[@class="houseInfo"]/text()')[1].split('|')[0].strip()
+                item['zhuangxiu'] = li.xpath('.//div[@class="houseInfo"]/text()')[1].split('|')[1].strip()
                 print(i, item)
                 mongo_db[item['city']].insert_one(item)
                 ret_list.append(item)
+
+    def changeip_2(self):
+        return random.choice(get_ret_proxies())
 
     def _get_queue(self):
         while 1:

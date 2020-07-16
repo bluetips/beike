@@ -31,8 +31,8 @@ def test(url):
             item['jiangjia'] = (int(item['guapaijia']) - int(item['dealPrice'])) / int(item['guapaijia'])
             item['url'] = li.xpath('.//a[@class="CLICKDATA maidian-detail"]/@href')[0]
             item['crawl_time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-            item['caoxiang'] = li.xpath('.//div[@class="houseInfo"]/span/text()').strip('|')[0]
-            item['zhuangxiu'] = li.xpath('.//div[@class="houseInfo"]/span/text()').strip('|')[1]
+            item['caoxiang'] = li.xpath('.//div[@class="houseInfo"]/text()')[1].split('|')[0].strip()
+            item['zhuangxiu'] = li.xpath('.//div[@class="houseInfo"]/text()')[1].split('|')[1].strip()
             print(item)
             ret_list.append(item)
 
